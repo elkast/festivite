@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrouvez un woubi proche a tracker</title>
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #699393;
+    color: #333;
+}
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+header {
+    background-color: #dc3c14;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+h1 {
+    margin: 0;
+    font-size: 28px;
+}
+.upload-section, .search-section {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.upload-box {
+    border: 3px dashed #4a90e2;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.upload-box:hover {
+    background-color: #f9f9f9;
+}
+.icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+.btn {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+.btn:hover {
+    background-color: #357abd;
+}
+.search-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+.person-feed {
+    margin-top: 40px;
+}
+.person-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+}
+.person-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-right: 20px;
+}
+.person-info {
+    flex-grow: 1;
+}
+.person-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.person-details {
+    font-size: 14px;
+    color: #666;
+}
+</style></head><body>
+<header>
+    <h1>WOUBI_TRACKING</h1>
+</header>
+
+<div class="container">
+    <div class="upload-section">
+        <h2>Publiez une photo de woubi proche a tracker</h2>
+        <div class="upload-box" id="uploadBox">
+            <div class="icon">📷</div>
+            <p>Touchez ici pour choisir un                                                                                                               Ce photo de woubi a tracker</p>
+        </div>
+        <button class="btn" id="publishBtn" style="display: none;">Publier</button>
+    </div>
+
+    <div class="search-section">
+        <h2>Recherchez un woubi</h2>
+        <input type="text" class="search-input" id="searchInput" placeholder="Nom, lieu, ou autres détails...">
+        <button class="btn" i</button>
+    </div>
+
+    <div class="person-feed" id="personFeed"></div>
+</div>
+
+<script>
+const uploadBox = document.getElementById('uploadBox');
+const publishBtn = document.getElementById('publishBtn');
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const personFeed = document.getElementById('personFeed');
+let uploadedImage = null;
+
+uploadBox.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => handleImage(e.target.files[0]);
+    input.click();
+});
+
+function handleImage(file) {
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            uploadedImage = e.target.result;
+            uploadBox.innerHTML = `<img src="${uploadedImage}" alt="Photo choisie" style="max-width: 100%; max-height: 200px; border-radius: 10px;">`;
+            publishBtn.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+publishBtn.addEventListener('click', () => {
+    if (!uploadedImage) {
+        alert('Veuillez d\'abord choisir une photo.');
+        return;
+    }
+
+    const personName = prompt("Nom de la personne:");
+    const lastSeenLocation = prompt("Dernier lieu vu:");
+    const additionalInfo = prompt("Informations supplémentaires:");
+
+    // Simuler l'envoi des informations au serveur
+    setTimeout(() => {
+        addPersonToFeed(uploadedImage, personName, lastSeenLocation, additionalInfo);
+        resetUploadBox();
+        alert('Les informations ont été publiées avec succès !');
+    }, 1000);
+});
+
+function addPersonToFeed(imageUrl, name, location, info) {
+    const personCard = document.createElement('div');
+    personCard.className = 'person-card';
+    personCard.innerHTML = `
+        <img src="${imageUrl}" alt="Photo de ${name}" class="person-image">
+        <div class="person-info">
+            <div class="person-name">${name}</div>
+            <div class="person-details">
+                <p><strong>Dernier lieu vu:</strong> ${location}</p>
+                <p><strong>Informations:</strong> ${info}</p>
+            </div>
+        </div>
+    `;
+    personFeed.insertBefore(personCard, personFeed.firstChild);
+}
+
+function resetUploadBox() {
+    uploadedImage = null;
+    uploadBox.innerHTML = `
+        <div class="icon">📷</div>
+        <p>Touchez ici pour choisir une photo</p>
+    `;
+    publishBtn.style.display = 'none';
+}
+
+searchBtn.addEventListener('click', () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    const personCards = personFeed.getElementsByClassName('person-card');
+    
+    Array.from(personCards).forEach(card => {
+        const cardText = card.textContent.toLowerCase();
+        if (cardText.includes(searchTerm)) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+// Simuler des personnes existantes dans le flux
+const samplePersons = [
+    {image: '', name: 'Marie Dubois pd', location: 'bingerville', info: 'Vêtements : jean bleu et t-shirt rouge'},
+    {image: '', name: 'Jean Martin pd', location: 'cocody', info: 'Vu pour la dernière fois près de la gare'},
+    {image: '', name: 'Sophie Lefèvre pd', location: 'yopougon', info: 'Cheveux bruns, yeux verts, 1m65'}
+];
+
+samplePersons.forEach(person => addPersonToFeed(person.image, person.name, person.location, person.info));
+</script>
+</body></html>

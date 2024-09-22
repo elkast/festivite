@@ -1,0 +1,196 @@
+<html><head><base href="https://websimcreation.com/photo-finder-next-steps">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhotoFinder - Prochaines étapes</title>
+<style>
+  :root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --background-color: #ecf0f1;
+    --text-color: #34495e;
+    --light-text: #ffffff;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  header {
+    background-color: var(--primary-color);
+    color: var(--light-text);
+    padding: 1rem 0;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+  }
+
+  .next-steps {
+    background-color: var(--light-text);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  li {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+
+  li:before {
+    content: '✓';
+    color: var(--secondary-color);
+    position: absolute;
+    left: 0;
+  }
+
+  .action-btn {
+    background-color: var(--secondary-color);
+    color: var(--light-text);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 1rem;
+  }
+
+  .action-btn:hover {
+    background-color: #27ae60;
+  }
+
+  #roadmap {
+    width: 100%;
+    height: 300px;
+    margin-top: 2rem;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>PhotoFinder - Prochaines étapes</h1>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="next-steps">
+      <h2>Améliorations et développements futurs</h2>
+      <ul>
+        <li>Intégrer une base de données réelle pour stocker les profils et les images</li>
+        <li>Implémenter un algorithme de reconnaissance faciale plus avancé</li>
+        <li>Ajouter des filtres de recherche (âge, localisation, profession, etc.)</li>
+        <li>Développer une fonction de mise en relation entre utilisateurs</li>
+        <li>Créer une application mobile pour iOS et Android</li>
+        <li>Mettre en place des mesures de sécurité et de confidentialité renforcées</li>
+        <li>Ajouter des fonctionnalités de partage sur les réseaux sociaux</li>
+        <li>Intégrer un système de notation et de commentaires pour les profils</li>
+      </ul>
+      <button class="action-btn" id="show-roadmap">Voir la feuille de route</button>
+    </section>
+
+    <div id="roadmap"></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script>
+    document.getElementById('show-roadmap').addEventListener('click', function() {
+      const roadmapElement = document.getElementById('roadmap');
+      roadmapElement.style.height = '400px';
+
+      const options = {
+        series: [
+          {
+            data: [
+              {
+                x: 'Base de données',
+                y: [new Date('2023-06-01').getTime(), new Date('2023-07-15').getTime()]
+              },
+              {
+                x: 'Reconnaissance faciale avancée',
+                y: [new Date('2023-07-01').getTime(), new Date('2023-08-30').getTime()]
+              },
+              {
+                x: 'Filtres de recherche',
+                y: [new Date('2023-08-15').getTime(), new Date('2023-09-30').getTime()]
+              },
+              {
+                x: 'Mise en relation',
+                y: [new Date('2023-09-15').getTime(), new Date('2023-11-15').getTime()]
+              },
+              {
+                x: 'Application mobile',
+                y: [new Date('2023-10-01').getTime(), new Date('2024-01-31').getTime()]
+              },
+              {
+                x: 'Sécurité renforcée',
+                y: [new Date('2023-11-01').getTime(), new Date('2023-12-31').getTime()]
+              }
+            ]
+          }
+        ],
+        chart: {
+          height: 350,
+          type: 'rangeBar'
+        },
+        plotOptions: {
+          bar: {
+            horizontal: true
+          }
+        },
+        xaxis: {
+          type: 'datetime'
+        },
+        title: {
+          text: 'Feuille de route PhotoFinder',
+          align: 'center'
+        }
+      };
+
+      const chart = new ApexCharts(roadmapElement, options);
+      chart.render();
+    });
+  </script>
+</body>
+</html>

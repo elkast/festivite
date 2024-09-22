@@ -1,0 +1,214 @@
+<html><head><base href="https://websimcreation.com/photo-finder-prototype">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhotoFinder - Prototype</title>
+<style>
+  :root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --background-color: #ecf0f1;
+    --text-color: #34495e;
+    --light-text: #ffffff;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  header {
+    background-color: var(--primary-color);
+    color: var(--light-text);
+    padding: 1rem 0;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+  }
+
+  #upload-section, #results-section {
+    background-color: var(--light-text);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+
+  #file-upload {
+    display: none;
+  }
+
+  .upload-btn {
+    background-color: var(--secondary-color);
+    color: var(--light-text);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .upload-btn:hover {
+    background-color: #27ae60;
+  }
+
+  #preview {
+    max-width: 100%;
+    margin-top: 1rem;
+    border-radius: var(--border-radius);
+  }
+
+  #results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .result-card {
+    background-color: var(--background-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+  }
+
+  .result-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .result-card .info {
+    padding: 1rem;
+  }
+
+  .result-card h3 {
+    margin-bottom: 0.5rem;
+  }
+
+  .result-card p {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>PhotoFinder</h1>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="upload-section">
+      <h2>Téléchargez une photo</h2>
+      <input type="file" id="file-upload" accept="image/*">
+      <label for="file-upload" class="upload-btn">Choisir une image</label>
+      <img id="preview" src="" alt="Aperçu de l'image" style="display: none;">
+    </section>
+
+    <section id="results-section" style="display: none;">
+      <h2>Résultats de la recherche</h2>
+      <div id="results"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+  <script>
+    const fileUpload = document.getElementById('file-upload');
+    const preview = document.getElementById('preview');
+    const resultsSection = document.getElementById('results-section');
+    const results = document.getElementById('results');
+
+    let model;
+
+    // Charger le modèle MobileNet
+    mobilenet.load().then(loadedModel => {
+      model = loadedModel;
+      console.log('Modèle MobileNet chargé');
+    });
+
+    fileUpload.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+
+        // Classifier l'image
+        classifyImage(preview);
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    async function classifyImage(imgElement) {
+      const predictions = await model.classify(imgElement);
+      console.log('Prédictions:', predictions);
+
+      // Simuler la recherche de personnes basée sur les prédictions
+      const mockResults = [
+        { name: 'John Doe', age: 28, profession: 'Photographe', image: 'https://randomuser.me/api/portraits/men/1.jpg' },
+        { name: 'Jane Smith', age: 34, profession: 'Designer', image: 'https://randomuser.me/api/portraits/women/2.jpg' },
+        { name: 'Mike Johnson', age: 45, profession: 'Ingénieur', image: 'https://randomuser.me/api/portraits/men/3.jpg' },
+        { name: 'Emily Brown', age: 31, profession: 'Artiste', image: 'https://randomuser.me/api/portraits/women/4.jpg' },
+      ];
+
+      displayResults(mockResults);
+    }
+
+    function displayResults(peopleResults) {
+      results.innerHTML = '';
+      peopleResults.forEach(person => {
+        const card = document.createElement('div');
+        card.className = 'result-card';
+        card.innerHTML = `
+          <img src="${person.image}" alt="${person.name}">
+          <div class="info">
+            <h3>${person.name}</h3>
+            <p>${person.age} ans, ${person.profession}</p>
+          </div>
+        `;
+        results.appendChild(card);
+      });
+
+      resultsSection.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

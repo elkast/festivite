@@ -1,0 +1,289 @@
+<html><head
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhotoFinder - Trouvez des personnes par photo</title>
+<style>
+  :root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --background-color: #ecf0f1;
+    --text-color: #34495e;
+    --light-text: #ffffff;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  header {
+    background-color: var(--primary-color);
+    color: var(--light-text);
+    padding: 1rem 0;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+  }
+
+  .upload-section {
+    background-color: var(--light-text);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .upload-area {
+    border: 2px dashed var(--primary-color);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .upload-area:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+  }
+
+  .upload-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+
+  .upload-text {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  #file-input {
+    display: none;
+  }
+
+  .upload-btn {
+    background-color: var(--primary-color);
+    color: var(--light-text);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .upload-btn:hover {
+    background-color: #2980b9;
+  }
+
+  .results-section {
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .result-card {
+    background-color: var(--light-text);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .result-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+  }
+
+  .result-info {
+    flex-grow: 1;
+  }
+
+  .result-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  .result-details {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+  }
+
+  .loading {
+    display: none;
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .loading-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>PhotoFinder</h1>
+      <p>Trouvez des personnes en fonction de leurs photos</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="upload-section">
+      <div class="upload-area" id="upload-area">
+        <div class="upload-icon">📸</div>
+        <p class="upload-text">Cliquez ou glissez-déposez une photo ici</p>
+        <input type="file" id="file-input" accept="image/*">
+        <button class="upload-btn" id="upload-btn">Sélectionner une photo</button>
+      </div>
+    </section>
+
+    <div class="loading" id="loading">
+      <div class="loading-spinner"></div>
+      <p>Recherche en cours...</p>
+    </div>
+
+    <section class="results-section" id="results-section">
+      <!-- Les résultats seront ajoutés ici dynamiquement -->
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+
+  <script>
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const loading = document.getElementById('loading');
+    const resultsSection = document.getElementById('results-section');
+
+    let model;
+    let classifier;
+
+    // Chargement du modèle MobileNet et initialisation du classificateur KNN
+    async function loadModel() {
+      model = await mobilenet.load();
+      classifier = knnClassifier.create();
+      console.log('Modèle chargé');
+    }
+
+    loadModel();
+
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.backgroundColor = 'rgba(52, 152, 219, 0.1)';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.backgroundColor = '';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.backgroundColor = '';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        processImage(file);
+      }
+    });
+
+    uploadBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        processImage(file);
+      }
+    });
+
+    async function processImage(file) {
+      loading.style.display = 'block';
+      resultsSection.innerHTML = '';
+
+      const img = await createImageBitmap(file);
+      const tensor = tf.browser.fromPixels(img).toFloat();
+      const resized = tf.image.resizeBilinear(tensor, [224, 224]);
+      const normalized = resized.div(255.0);
+      const batched = normalized.expandDims(0);
+      const activation = model.infer(batched, 'conv_preds');
+
+      // Simulation de la recherche de personnes similaires
+      setTimeout(() => {
+        const results = [
+          { name: 'John Doe', similarity: '95%', details: 'Photographe, Paris' },
+          { name: 'Jane Smith', similarity: '87%', details: 'Designer, New York' },
+          { name: 'Mike Johnson', similarity: '82%', details: 'Ingénieur, Tokyo' },
+        ];
+
+        displayResults(results);
+        loading.style.display = 'none';
+      }, 2000);
+    }
+
+    function displayResults(results) {
+      resultsSection.innerHTML = '';
+      results.forEach(result => {
+        const resultCard = document.createElement('div');
+        resultCard.className = 'result-card';
+        resultCard.innerHTML = `
+          <img src="https://picsum.photos/80" alt="${result.name}" class="result-image">
+          <div class="result-info">
+            <h3 class="result-name">${result.name}</h3>
+            <p class="result-details">Similarité: ${result.similarity}</p>
+            <p class="result-details">${result.details}</p>
+          </div>
+        `;
+        resultsSection.appendChild(resultCard);
+      });
+    }
+  </script>
+</body>
+</html>
